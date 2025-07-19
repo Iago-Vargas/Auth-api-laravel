@@ -44,5 +44,30 @@ class AuthController extends Controller
             // Senha tem que ser ter, requirida
             'password' => 'required'
         ]);
-}
+        // Agora vamos realizar a busca no BD
+        $user = $this->userModel->where('email',$request->email)->first();
+
+        // Agora o HASH verifica se a senha do BD bate com a que colocamos, por conta da criptografia
+        if (!$user || !Hash::check($request->password, $user->password)){
+            return ['Erro de Login' => 'As credenciais estão incorretas!'];
+        }
+        // Vamos realizar a criação do token associado ao usuario
+        // PlainTextToken transforma o token em texto simples
+        $token = $user->createToken($user->name)->plainTextToken;
+        return response()->json([
+            'user' => $user,
+            'token' => $token
+        ], 201);
+    }
+
+    // Logout do usuario
+    public function logout(Request $request){
+        // Vamos deletar o token do usuario
+        $request->user()->tokens()->delete();
+
+        // Mensagem de sucesso ao deslogar
+        return response()->json([
+            'Deslogado' => 'Você foi deslogado com sucesso!'
+        ],201);
+    }
 }
