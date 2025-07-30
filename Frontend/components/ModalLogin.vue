@@ -10,10 +10,32 @@ const email = ref('')
 const senha = ref('')
 const mostrarSenha = ref('')
 
-function login (){
-    console.log('Login:', email.value, senha.value)
-    // Chamar nosso backend aqui
-}
+// Função de login
+async function login() {
+  if (!email.value || !senha.value) {
+    alert('Preencha todos os campos!')
+    return
+  }
+  try{
+    const data = await $fetch('http://localhost:8000/api/login', {
+    method: 'POST',
+    body: {
+      email: email.value,
+      password: senha.value
+    },
+    headers: {
+      'Content-Type': 'application/json'
+    }
+  })
+  localStorage.setItem('token', data.token)
+  alert('login realizado.')
+  emit('close')  
+  } catch (error) {
+    console.error('Erro ao fazer login:', error)
+    alert('Erro ao fazer login!')
+  }
+  }
+
 </script>
 
 <template>
